@@ -13,7 +13,7 @@ This app is not affiliated with or endorsed by Decathlon or Domyos.
 
 ## Status
 
-Milestone M0: app skeleton and CI. The screen is a static placeholder.
+Milestone M1: Bluetooth data parser, metric list and a simulated rower. The screen is still a static placeholder.
 
 ## Install
 

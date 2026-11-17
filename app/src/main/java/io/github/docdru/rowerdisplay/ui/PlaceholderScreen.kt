@@ -42,8 +42,8 @@ fun PlaceholderScreen(modifier: Modifier = Modifier) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Slot(label = "Goal", value = formatMinutesSeconds(760))
-            Slot(label = "Pace / 500 m", value = formatMinutesSeconds(128))
+            Slot(label = "Goal", value = formatClock(760))
+            Slot(label = "Pace / 500 m", value = formatClock(128))
             Slot(label = "Distance m", value = formatMetres(1720))
         }
         Box(
