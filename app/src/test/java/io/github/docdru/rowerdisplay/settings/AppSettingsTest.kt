@@ -57,6 +57,14 @@ class AppSettingsTest {
     }
 
     @Test
+    fun sanitizedClampsGoals() {
+        val farTooLong = AppSettings(goal = Goal.Distance(200_000)).sanitized().goal
+        assertEquals(Goal.Distance(100_000), farTooLong)
+        assertEquals(Goal.Distance(100), AppSettings(goal = Goal.Distance(0)).sanitized().goal)
+        assertEquals(Goal.Time(60), AppSettings(goal = Goal.Time(5)).sanitized().goal)
+    }
+
+    @Test
     fun defaultsAreAlreadySane() {
         assertEquals(AppSettings(), AppSettings().sanitized())
     }
