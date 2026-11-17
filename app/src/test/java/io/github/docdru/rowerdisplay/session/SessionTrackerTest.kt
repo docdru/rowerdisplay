@@ -77,6 +77,15 @@ class SessionTrackerTest {
     }
 
     @Test
+    fun firstUpdateIsNotRowingEvenWithDistance() {
+        // Joining mid-row: the first packet only sets the baseline.
+        val state = SessionTracker(Goal.Time(600)).update(RowerData(totalDistanceM = 1500), 0L)
+        assertFalse(state.rowing)
+        assertEquals(0, state.elapsedS)
+        assertEquals(0, state.distanceM)
+    }
+
+    @Test
     fun longGapIsNotCountedAsRowingTime() {
         val tracker = SessionTracker(Goal.Time(600))
         tracker.update(RowerData(totalDistanceM = 0), 0L)
