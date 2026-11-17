@@ -7,13 +7,15 @@ A very simple Android app that shows live data from an FTMS rowing machine, buil
 - **Right:** one accumulated value, such as distance, elapsed time or calories.
 - **Bottom band:** the middle value over the session, with its target band shaded.
 
+Tap a value's label to choose what that slot shows. The start screen sets the goal; the gear opens the settings (target ranges, demo mode). Back or **End** ends the session.
+
 Later: heart rate, then recorded sessions you can compare.
 
 This app is not affiliated with or endorsed by Decathlon or Domyos.
 
 ## Status
 
-Milestone M3: connects to the rower over Bluetooth and shows the live session. Goal and display choices are fixed until M4.
+Milestone M4: start screen with a time or distance goal, value choices on the rowing screen, settings for target ranges and a demo mode.
 
 ## Install
 

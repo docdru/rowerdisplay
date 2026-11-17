@@ -130,7 +130,8 @@ fun SessionGraph(
         BasicText(
             text = "Goal ${goalLabel(state.goal)}",
             style = labelStyle,
-            modifier = Modifier.align(Alignment.BottomEnd).padding(padding / 2),
+            // Top right, clear of the goal marker that sits near the right edge past the goal.
+            modifier = Modifier.align(Alignment.TopEnd).padding(padding / 2),
         )
     }
 }
