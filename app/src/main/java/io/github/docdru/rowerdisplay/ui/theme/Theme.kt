@@ -1,5 +1,6 @@
 package io.github.docdru.rowerdisplay.ui.theme
 
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
@@ -45,6 +46,11 @@ fun RowerDisplayTheme(content: @Composable () -> Unit) {
         outlineVariant = colors.outline,
     )
     MaterialTheme(colorScheme = scheme) {
-        CompositionLocalProvider(LocalRowerColors provides colors, content = content)
+        // Text and icons outside a Material surface default to black: make them light.
+        CompositionLocalProvider(
+            LocalRowerColors provides colors,
+            LocalContentColor provides colors.text,
+            content = content,
+        )
     }
 }
