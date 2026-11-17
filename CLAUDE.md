@@ -76,7 +76,7 @@ On pull requests, CI also pushes the screenshots to the `ci-screenshots` branch 
 
 ## Releases
 
-`.github/workflows/release.yml` runs when a tag `vX.Y.Z` is pushed: lint and unit tests, a signed release APK (`versionName` from the tag, `versionCode` = the workflow's run number), a signature check, then a GitHub Release with `rowerdisplay-vX.Y.Z.apk` and generated notes. Create releases only when the owner asks; tag a commit on `main`.
+`.github/workflows/release.yml` runs either from the Actions tab (**Release → Run workflow** on `main`, with a version like `1.2.3`; the workflow creates the tag `v1.2.3` after a successful build) or when a tag `vX.Y.Z` is pushed. AI sessions cannot push tags or create them through the API, so they ask the owner to press Run workflow. It runs lint and unit tests, a signed release APK (`versionName` from the tag, `versionCode` = the workflow's run number), a signature check, then a GitHub Release with `rowerdisplay-vX.Y.Z.apk` and generated notes. Create releases only when the owner asks, always from `main`. If a release was made by hand on GitHub for the tag, the workflow attaches the APK to it.
 
 Signing uses four repository secrets (Settings → Secrets and variables → Actions): `RELEASE_KEYSTORE_BASE64` (the `.jks` file, base64), `RELEASE_KEYSTORE_PASSWORD`, `RELEASE_KEY_ALIAS`, `RELEASE_KEY_PASSWORD`. The workflow stops with a clear error if one is missing. Never commit a keystore or print a secret. The owner keeps a backup of the keystore: without it, later versions cannot be installed over the existing app. Debug APKs from CI use a different key, so switching between a debug and a release build needs an uninstall.
 
