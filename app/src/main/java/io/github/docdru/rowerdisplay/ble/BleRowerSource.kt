@@ -8,6 +8,7 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
+import android.bluetooth.BluetoothStatusCodes
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
@@ -214,7 +215,7 @@ class BleRowerSource(context: Context) : RowerSource {
         descriptor: BluetoothGattDescriptor,
         value: ByteArray,
     ): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        gatt.writeDescriptor(descriptor, value) == BluetoothGatt.GATT_SUCCESS
+        gatt.writeDescriptor(descriptor, value) == BluetoothStatusCodes.SUCCESS
     } else {
         descriptor.value = value
         gatt.writeDescriptor(descriptor)
