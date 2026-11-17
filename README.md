@@ -13,7 +13,7 @@ This app is not affiliated with or endorsed by Decathlon or Domyos.
 
 ## Status
 
-Milestone M1: Bluetooth data parser, metric list and a simulated rower. The screen is still a static placeholder.
+Milestone M2: the rowing screen, driven by a simulated rower. No Bluetooth yet.
 
 ## Install
 
