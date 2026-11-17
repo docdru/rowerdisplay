@@ -13,10 +13,7 @@ import io.github.docdru.rowerdisplay.ble.RowerData
  *
  * Not thread-safe: call [update] from one thread.
  */
-class SessionTracker(
-    val goal: Goal,
-    private val smoothing: Double = DEFAULT_SMOOTHING,
-) {
+class SessionTracker(val goal: Goal, private val smoothing: Double = DEFAULT_SMOOTHING) {
     var state: SessionState = SessionState(goal)
         private set
 
