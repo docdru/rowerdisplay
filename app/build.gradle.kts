@@ -6,6 +6,10 @@ plugins {
     alias(libs.plugins.roborazzi)
 }
 
+// Release signing comes from CI secrets (see CLAUDE.md, "Releases"). Without them,
+// assembleRelease still works but produces an unsigned APK.
+val releaseKeystore: String? = System.getenv("RELEASE_KEYSTORE_PATH")
+
 android {
     namespace = "io.github.docdru.rowerdisplay"
     compileSdk = 35
@@ -14,13 +18,28 @@ android {
         applicationId = "io.github.docdru.rowerdisplay"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0"
+        // The release workflow passes the tag (v1.2.3 -> 1.2.3) and the run number.
+        versionCode = (findProperty("appVersionCode") as String?)?.toInt() ?: 1
+        versionName = (findProperty("appVersionName") as String?) ?: "0.1.0-dev"
+    }
+
+    signingConfigs {
+        if (releaseKeystore != null) {
+            create("release") {
+                storeFile = file(releaseKeystore)
+                storePassword = System.getenv("RELEASE_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("RELEASE_KEY_ALIAS")
+                keyPassword = System.getenv("RELEASE_KEY_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
+            if (releaseKeystore != null) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
 

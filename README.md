@@ -15,11 +15,13 @@ This app is not affiliated with or endorsed by Decathlon or Domyos.
 
 ## Status
 
-Milestone M4: start screen with a time or distance goal, value choices on the rowing screen, settings for target ranges and a demo mode.
+Milestone M5: signed releases on GitHub Releases. Next: heart rate (M6), then recorded sessions (M7).
 
 ## Install
 
-Every pull request and every push to `main` builds a debug APK. Open the CI run under **Actions**, download the `rowerdisplay-debug-apk` artifact, unzip it and install the APK on the device. Signed release builds on GitHub Releases come with milestone M5.
+**Releases:** download `rowerdisplay-vX.Y.Z.apk` from the [Releases page](https://github.com/docdru/rowerdisplay/releases) and install it. The [Obtainium](https://github.com/ImranR98/Obtainium) app can watch that page and install updates for you.
+
+**Test builds:** every pull request builds a debug APK. Open the CI run linked in the PR's screenshot comment, download `rowerdisplay-debug-apk`, unzip it and install. Debug and release builds are signed with different keys: uninstall one before installing the other.
 
 Requires Android 8.0 (API 26) or newer and Bluetooth LE.
 

@@ -60,12 +60,18 @@ Read this before changing anything. The owner builds this app with AI only and r
 1. Gradle wrapper validation
 2. `ktlintCheck lintDebug`
 3. `testDebugUnitTest -Proborazzi.test.record=true` (unit tests, and screenshots rendered with Roborazzi/Robolectric)
-4. `assembleDebug`
+4. `assembleDebug assembleRelease` (the release APK is unsigned here; it only checks that the release build works)
 
 Artifacts: `screenshots` (PNG per screen and device size), `rowerdisplay-debug-apk`, and `reports` on failure.
 
 On pull requests, CI also pushes the screenshots to the `ci-screenshots` branch (`pr-<number>/<short sha>/<name>.png`) and keeps one PR comment that shows them inline. AI sessions usually cannot download Actions artifacts, but they can fetch `https://raw.githubusercontent.com/docdru/rowerdisplay/ci-screenshots/pr-<number>/<short sha>/<name>.png` to look at the result. Never merge `ci-screenshots` into `main`.
 
 `.github/workflows/ai-review.yml` posts an AI review (Mistral, via the `docdru/ai-review` action) as one PR comment, updated on every push. It is advisory, not a required check: verify its findings, fix real ones, and say in the PR when a finding is wrong. Its instructions and checklists are in `.github/ai-review.toml` (read from `main`); update it when this file's rules change. Dependabot keeps the action's pinned commit current.
+
+## Releases
+
+`.github/workflows/release.yml` runs when a tag `vX.Y.Z` is pushed: lint and unit tests, a signed release APK (`versionName` from the tag, `versionCode` = the workflow's run number), a signature check, then a GitHub Release with `rowerdisplay-vX.Y.Z.apk` and generated notes. Create releases only when the owner asks; tag a commit on `main`.
+
+Signing uses four repository secrets (Settings → Secrets and variables → Actions): `RELEASE_KEYSTORE_BASE64` (the `.jks` file, base64), `RELEASE_KEYSTORE_PASSWORD`, `RELEASE_KEY_ALIAS`, `RELEASE_KEY_PASSWORD`. The workflow stops with a clear error if one is missing. Never commit a keystore or print a secret. The owner keeps a backup of the keystore: without it, later versions cannot be installed over the existing app. Debug APKs from CI use a different key, so switching between a debug and a release build needs an uninstall.
 
 Screenshot tests live in `app/src/test/.../ScreenshotTest.kt`. Add a test for every new screen state, at phone (`w844dp-h390dp-land-xxhdpi`) and tablet (`w1280dp-h800dp-land-mdpi`) size.
