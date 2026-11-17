@@ -80,15 +80,10 @@ internal fun AppSettings.sanitized(): AppSettings {
         middle = middle.takeIf { it.kind == MetricKind.Momentary } ?: defaults.middle,
         right = right.takeIf { it.kind == MetricKind.Accumulated } ?: defaults.right,
         targets = Metric.momentary.associateWith { metric ->
-            val band = targets[metric]
             val limits = metric.targetLimits
-            val valid = band != null && band.low >= limits.min && band.high <= limits.max &&
-                band.low < band.high
-            if (valid && band != null) {
-                band
-            } else {
-                TargetBand.defaults.getValue(metric)
-            }
+            targets[metric]
+                ?.takeIf { it.low >= limits.min && it.high <= limits.max && it.low < it.high }
+                ?: TargetBand.defaults.getValue(metric)
         },
     )
 }
