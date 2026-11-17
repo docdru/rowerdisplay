@@ -18,6 +18,8 @@ class RowerMatcherTest {
 
     @Test
     fun domyosRowerByName() {
+        // The exact name from the owner's nRF Connect log, and an upper-case variant.
+        assertTrue(RowerMatcher.isRower("Domyos-ROW-1580", emptyList(), null))
         assertTrue(RowerMatcher.isRower("DOMYOS-ROW-1580", emptyList(), null))
     }
 
