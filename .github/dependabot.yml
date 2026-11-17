@@ -1,0 +1,12 @@
+# Weekly updates of the GitHub Actions used in .github/workflows, as PRs
+# (CI and the AI review run on each). Keeps the pinned docdru/ai-review
+# commit current.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
