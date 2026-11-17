@@ -3,7 +3,10 @@ package io.github.docdru.rowerdisplay
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import io.github.docdru.rowerdisplay.ui.PlaceholderScreen
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.docdru.rowerdisplay.ui.RowingScreen
 import io.github.docdru.rowerdisplay.ui.theme.RowerDisplayTheme
 
 class MainActivity : ComponentActivity() {
@@ -11,7 +14,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             RowerDisplayTheme {
-                PlaceholderScreen()
+                val viewModel: RowingViewModel = viewModel()
+                val state by viewModel.state.collectAsStateWithLifecycle()
+                RowingScreen(state)
             }
         }
     }
