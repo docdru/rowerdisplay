@@ -64,4 +64,6 @@ Artifacts: `screenshots` (PNG per screen and device size), `rowerdisplay-debug-a
 
 On pull requests, CI also pushes the screenshots to the `ci-screenshots` branch (`pr-<number>/<short sha>/<name>.png`) and keeps one PR comment that shows them inline. AI sessions usually cannot download Actions artifacts, but they can fetch `https://raw.githubusercontent.com/docdru/rowerdisplay/ci-screenshots/pr-<number>/<short sha>/<name>.png` to look at the result. Never merge `ci-screenshots` into `main`.
 
+`.github/workflows/ai-review.yml` posts an AI review (Mistral, via the `docdru/ai-review` action) as one PR comment, updated on every push. It is advisory, not a required check: verify its findings, fix real ones, and say in the PR when a finding is wrong. Its instructions and checklists are in `.github/ai-review.toml` (read from `main`); update it when this file's rules change. Dependabot keeps the action's pinned commit current.
+
 Screenshot tests live in `app/src/test/.../ScreenshotTest.kt`. Add a test for every new screen state, at phone (`w844dp-h390dp-land-xxhdpi`) and tablet (`w1280dp-h800dp-land-mdpi`) size.

@@ -1,0 +1,124 @@
+# AI PR review config, used by the docdru/ai-review action
+# (.github/workflows/ai-review.yml). Read from main: a change takes effect
+# after it is merged. Try it first with --dry-run --config, see
+# https://github.com/docdru/ai-review#try-it-locally
+
+model = "mistral-large-2512"
+
+project = """
+'rowerdisplay', a small open-source Android app (Kotlin, Jetpack Compose,
+single `app` module, minSdk 26, target/compile SDK 35) that shows live data from
+an FTMS rowing machine (Domyos Woodrower) over Bluetooth LE on one landscape
+screen for phone and tablet. The owner builds it with AI assistants only, never
+builds locally (GitHub Actions is the only builder) and reviews PRs on a phone,
+so findings must be concrete: file, line, what goes wrong on the real rower or
+device, and the fix."""
+
+instructions = """
+Reviewer context:
+- The owner cannot easily run the code before merging. Flag anything that
+  would only show up on a real device: Bluetooth permission flows, reconnects,
+  screen-off/rotation/background, a missing recomposition, a crash on an
+  unexpected byte array.
+- ktlint and Android lint run in CI: do not report formatting or lint-style
+  issues.
+- Milestones are listed in CLAUDE.md. A PR should do one milestone or fix:
+  flag features outside the PR's stated milestone (scope creep) and product
+  behaviour that differs from "Product decisions" without being called out
+  in the PR description.
+Known tricky areas:
+- FTMS Rower Data (0x2AD1): fields are present only if their flag bit says so
+  (bit 0 "More Data" is inverted: 0 means stroke rate/count ARE present);
+  fields are little-endian, unsigned unless the spec says signed (power is
+  sint16), with fixed resolutions (stroke rate 0.5/min, average stroke rate
+  0.5/min, total distance uint24 m, pace s/500 m, energy per hour/minute,
+  elapsed time s). One measurement may be split over several notifications.
+  Check offsets, sizes, scaling, signedness and short/garbage packets (must
+  not crash). Parser changes need tests from recorded bytes.
+- Units and formatting: pace is shown per 500 m as m:ss, distance in m/km,
+  time as h:mm:ss; rounding must not show 1:60 or jump backwards.
+- Session logic: goal reached exactly once (one sound, one vibration), keeps
+  counting afterwards (goalPassed state); pause/resume; time goal is a
+  60-minute disc.
+- BLE and lifecycle: API 31+ BLUETOOTH_SCAN/BLUETOOTH_CONNECT (scan with
+  neverForLocation), API 26-30 needs location permission for scans; denied or
+  revoked permissions and Bluetooth off are handled; GATT callbacks arrive on
+  binder threads (no direct UI state writes, no leaked BluetoothGatt, close()
+  on disconnect); coroutines/flows scoped to a lifecycle; keep-screen-on only
+  during a session.
+- Compose: data arrives several times per second; avoid allocations and state
+  reads in Canvas draw paths that recompose the whole screen; big numbers
+  never wrap (font scales down)."""
+
+reference_docs = [
+  { path = "CLAUDE.md", role = "project rules: workflow, milestones, product decisions, technical conventions, rower facts and CI; binding" },
+  { path = "README.md", role = "user-facing description, status and install steps" },
+]
+
+# Not sent; the wrapper is checked by the CI's wrapper validation.
+generated_files = ["gradlew", "gradlew.bat"]
+extra_binary_suffixes = [".apk", ".aab", ".jks", ".so"]
+
+[[sections]]
+key = "correctness"
+title = "🧪 Correctness & tests"
+checklist = """
+logic errors and edge cases, with the tricky areas above in mind: FTMS
+parsing (flags, offsets, scaling, signedness, short packets), units and
+formatting, session and goal state, BLE connection and permission handling,
+threading and lifecycle (leaks, work on the main thread, state written from
+GATT callbacks), Compose state and recomposition. Also flag: behaviour
+changes without unit tests; parser changes without tests from recorded bytes;
+a new screen state without a Roborazzi screenshot test at both phone
+(w844dp-h390dp-land-xxhdpi) and tablet (w1280dp-h800dp-land-mdpi) size;
+removed or weakened assertions."""
+
+[[sections]]
+key = "rules"
+title = "📐 Product & project rules"
+reference = true
+checklist = """
+does the change follow CLAUDE.md? Especially:
+- Product decisions: landscape only, dark theme only, the screen layout (goal
+  left, momentary middle, accumulated right, graph band bottom third, no
+  overlapping elements), goal disc/bar behaviour, middle slot = momentary
+  values only, right slot = accumulated values only, big numbers never wrap.
+- The app name (strings, manifest label, README, release names) never
+  contains "Domyos" or "Decathlon".
+- No proprietary dependencies (Google Play services, Firebase, analytics,
+  crash reporting, closed-source SDKs) and no chart libraries: F-Droid must
+  stay possible; custom drawing uses Compose Canvas.
+- Conventions: package io.github.docdru.rowerdisplay; dependency and plugin
+  versions only in gradle/libs.versions.toml; colours only in ui/theme/Theme.kt
+  (RowerColors), no hard-coded Color(...) elsewhere; planned layers (ble,
+  session, ui, data) respected, real and simulated rower behind one interface.
+- Docs: a change to milestones, product behaviour, CI or conventions updates
+  CLAUDE.md (and README "Status" when a milestone lands).
+Cite "CLAUDE.md: <section>"."""
+
+[[sections]]
+key = "security"
+title = "🔒 Security, privacy & CI"
+security = true
+checklist = """
+the app is public and installed as an APK from CI or GitHub Releases. Check:
+- Permissions: only what the feature needs. No INTERNET or location
+  permission without a stated reason (the app has no network features);
+  Bluetooth permissions scoped by maxSdkVersion / neverForLocation where
+  possible. No new exported components, intent filters or content providers
+  without need; allowBackup stays false.
+- Privacy: no tracking, no data leaving the device; recorded sessions and
+  heart rate (M6/M7) stay local; no logging of device addresses or user data
+  in release builds.
+- Robustness against a hostile BLE peer: parsing never trusts lengths from the
+  packet, never throws out of a GATT callback.
+- Release signing (M5): no keystore, key, password or google-services file
+  committed; signing secrets only via GitHub secrets, never echoed in logs.
+- GitHub Actions and scripts (.github/): minimal permissions per job; no
+  untrusted input (PR title, body, branch name, comment text) interpolated
+  into `run:` or into shell without quoting; the ci-screenshots push stays
+  limited to that branch; no pull_request_target; new third-party actions
+  justified (prefer pinned commit SHAs); Gradle wrapper validation kept.
+- Supply chain: new dependencies or Gradle plugins justified and from
+  Google Maven / Maven Central; no dynamic versions (+, latest.release);
+  gradle-wrapper.properties keeps an official distributionUrl."""
