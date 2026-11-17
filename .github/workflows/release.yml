@@ -45,8 +45,9 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
-      - name: Unit tests
-        run: ./gradlew --stacktrace testDebugUnitTest
+      # Same checks as CI, in case a tag is pushed on a commit that skipped it.
+      - name: Lint and unit tests
+        run: ./gradlew --stacktrace ktlintCheck lintDebug testDebugUnitTest
 
       - name: Build signed release APK
         env:
