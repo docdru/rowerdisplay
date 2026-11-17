@@ -105,8 +105,7 @@ class ScreenshotTest {
         )
     }
 
-    private fun capture(name: String, state: RowingUiState) =
-        render(name) { RowingScreen(state) }
+    private fun capture(name: String, state: RowingUiState) = render(name) { RowingScreen(state) }
 
     private fun captureStart(name: String, goal: Goal) = render(name) {
         StartScreen(
