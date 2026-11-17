@@ -50,6 +50,7 @@ Read this before changing anything. The owner builds this app with AI only and r
 - Rower Data 0x2AD1 (notify): stroke rate, stroke count, average stroke rate, total distance, instantaneous pace, instantaneous power, resistance level, energy (total, per hour, per minute), heart rate, elapsed time.
 - Fitness Machine Feature 0x2ACC (read). Training Status 0x2AD3 (notify, read).
 - FTMS may split fields across notifications: always parse by the flags field.
+- The parser tests use hand-built bytes in the exact layout the rower announced (flags `0x0BAE`). When a log of real notifications exists (nRF Connect export), add those bytes as tests.
 
 ## CI
 
