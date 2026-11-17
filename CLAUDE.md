@@ -62,4 +62,6 @@ Read this before changing anything. The owner builds this app with AI only and r
 
 Artifacts: `screenshots` (PNG per screen and device size), `rowerdisplay-debug-apk`, and `reports` on failure.
 
+On pull requests, CI also pushes the screenshots to the `ci-screenshots` branch (`pr-<number>/<short sha>/<name>.png`) and keeps one PR comment that shows them inline. AI sessions usually cannot download Actions artifacts, but they can fetch `https://raw.githubusercontent.com/docdru/rowerdisplay/ci-screenshots/pr-<number>/<short sha>/<name>.png` to look at the result. Never merge `ci-screenshots` into `main`.
+
 Screenshot tests live in `app/src/test/.../ScreenshotTest.kt`. Add a test for every new screen state, at phone (`w844dp-h390dp-land-xxhdpi`) and tablet (`w1280dp-h800dp-land-mdpi`) size.
