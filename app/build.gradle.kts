@@ -46,6 +46,9 @@ android {
     lint {
         abortOnError = true
         warningsAsErrors = false
+        // Print every finding into the CI log; AI sessions cannot download the HTML report.
+        textReport = true
+        textOutput = file("stdout")
         // Version-update checks depend on the day the build runs, not on the code.
         disable += setOf("GradleDependency", "NewerVersionAvailable", "AndroidGradlePluginVersion")
     }

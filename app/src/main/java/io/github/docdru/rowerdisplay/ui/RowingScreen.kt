@@ -1,6 +1,7 @@
 package io.github.docdru.rowerdisplay.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -61,7 +62,11 @@ private data class Dimensions(
  * in the top two thirds; the graph of the middle value in the bottom third.
  */
 @Composable
-fun RowingScreen(state: RowingUiState, modifier: Modifier = Modifier) {
+fun RowingScreen(
+    state: RowingUiState,
+    modifier: Modifier = Modifier,
+    onStatusClick: () -> Unit = {},
+) {
     val colors = LocalRowerColors.current
     BoxWithConstraints(modifier = modifier.fillMaxSize().background(colors.background)) {
         val scale = (maxHeight / 390.dp).coerceIn(1f, 2f)
@@ -78,7 +83,7 @@ fun RowingScreen(state: RowingUiState, modifier: Modifier = Modifier) {
                     .weight(2f)
                     .padding(horizontal = dims.padding, vertical = dims.padding / 2),
             ) {
-                StatusLine(state.connection, dims)
+                StatusLine(state.connection, dims, onStatusClick)
                 Row(
                     modifier = Modifier.fillMaxWidth().weight(1f),
                     horizontalArrangement = Arrangement.spacedBy(dims.gap),
@@ -111,19 +116,24 @@ fun RowingScreen(state: RowingUiState, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun StatusLine(connection: ConnectionState, dims: Dimensions) {
+private fun StatusLine(connection: ConnectionState, dims: Dimensions, onClick: () -> Unit) {
     val colors = LocalRowerColors.current
     val (text, live) = when (connection) {
         ConnectionState.Idle -> "Not connected" to false
-        ConnectionState.MissingPermission -> "Bluetooth permission needed" to false
-        ConnectionState.BluetoothOff -> "Bluetooth is off" to false
+        ConnectionState.MissingPermission -> "Bluetooth permission needed – tap to allow" to false
+        ConnectionState.BluetoothOff -> "Bluetooth is off – tap to turn on" to false
         ConnectionState.Scanning -> "Searching for the rower…" to false
         is ConnectionState.Connecting -> "Connecting to ${connection.deviceName}…" to false
         is ConnectionState.Connected -> "Connected to ${connection.deviceName}" to true
         ConnectionState.Simulated -> "Simulated rower" to true
     }
+    val actionable = connection == ConnectionState.MissingPermission ||
+        connection == ConnectionState.BluetoothOff
     Row(
-        modifier = Modifier.fillMaxWidth().height(dims.labelHeight),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(dims.labelHeight)
+            .then(if (actionable) Modifier.clickable(onClick = onClick) else Modifier),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
