@@ -91,7 +91,9 @@ class FtmsParserTest {
     @Test
     fun splitMeasurementMergesIntoOneState() {
         // First notification: stroke rate/count + distance. Second: More Data + pace + power.
-        val first = FtmsParser.parseRowerData(bytes(0x04, 0x00, 0x30, 0x0A, 0x00, 0x64, 0x00, 0x00))!!
+        val first = FtmsParser.parseRowerData(
+            bytes(0x04, 0x00, 0x30, 0x0A, 0x00, 0x64, 0x00, 0x00),
+        )!!
         val second = FtmsParser.parseRowerData(bytes(0x29, 0x00, 0x82, 0x00, 0x96, 0x00))!!
 
         val merged = RowerData().mergedWith(first).mergedWith(second)

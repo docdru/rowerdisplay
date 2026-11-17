@@ -1,5 +1,8 @@
 package io.github.docdru.rowerdisplay.ble
 
+import kotlin.math.PI
+import kotlin.math.roundToInt
+import kotlin.math.sin
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -7,9 +10,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlin.math.PI
-import kotlin.math.roundToInt
-import kotlin.math.sin
 
 /**
  * A rower that rows by itself: a short start-up, then a pace drifting around 2:08/500 m.
