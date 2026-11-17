@@ -120,6 +120,13 @@ class FtmsParserTest {
     }
 
     @Test
+    fun negativeResistanceLevelIsParsedNotRejected() {
+        // More Data + resistance level -3 (0xFFFD). FTMS allows negative levels.
+        val data = FtmsParser.parseRowerData(bytes(0x81, 0x00, 0xFD, 0xFF))!!
+        assertEquals(-3, data.resistanceLevel)
+    }
+
+    @Test
     fun unsignedFieldsAboveSignedRange() {
         // More Data + pace 0xFFFF must stay 65535, not become negative.
         val data = FtmsParser.parseRowerData(bytes(0x09, 0x00, 0xFF, 0xFF))!!
