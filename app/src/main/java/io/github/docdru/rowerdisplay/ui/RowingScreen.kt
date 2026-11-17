@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,10 +14,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
@@ -35,6 +45,7 @@ import io.github.docdru.rowerdisplay.session.TargetBand
 import io.github.docdru.rowerdisplay.ui.components.AutoSizeText
 import io.github.docdru.rowerdisplay.ui.components.DistanceBar
 import io.github.docdru.rowerdisplay.ui.components.SessionGraph
+import io.github.docdru.rowerdisplay.ui.components.StatusLine
 import io.github.docdru.rowerdisplay.ui.components.TimerDisc
 import io.github.docdru.rowerdisplay.ui.theme.LocalRowerColors
 import io.github.docdru.rowerdisplay.ui.theme.RowerColors
@@ -50,40 +61,63 @@ data class RowingUiState(
 )
 
 /** Sizes that grow with the screen, so a tablet is not a stretched phone. */
-private data class Dimensions(
+internal data class Dimensions(
     val padding: Dp,
     val gap: Dp,
     val labelSize: TextUnit,
     val labelHeight: Dp,
-)
+) {
+    companion object {
+        fun forHeight(height: Dp): Dimensions {
+            val scale = (height / 390.dp).coerceIn(1f, 2f)
+            return Dimensions(
+                padding = 20.dp * scale,
+                gap = 24.dp * scale,
+                labelSize = 13.sp * scale,
+                labelHeight = 44.dp * scale.coerceAtMost(1.3f),
+            )
+        }
+    }
+}
 
 /**
  * The one screen: goal (left), momentary value (middle) and accumulated value (right)
- * in the top two thirds; the graph of the middle value in the bottom third.
+ * in the top two thirds; the graph of the middle value in the bottom third. Tapping a
+ * value's label picks another value for that slot.
  */
 @Composable
 fun RowingScreen(
     state: RowingUiState,
     modifier: Modifier = Modifier,
     onStatusClick: () -> Unit = {},
+    onPickMiddle: (Metric) -> Unit = {},
+    onPickRight: (Metric) -> Unit = {},
+    onSettings: () -> Unit = {},
+    onEnd: () -> Unit = {},
 ) {
     val colors = LocalRowerColors.current
     BoxWithConstraints(modifier = modifier.fillMaxSize().background(colors.background)) {
-        val scale = (maxHeight / 390.dp).coerceIn(1f, 2f)
-        val dims = Dimensions(
-            padding = 20.dp * scale,
-            gap = 24.dp * scale,
-            labelSize = 13.sp * scale,
-            labelHeight = 28.dp * scale,
-        )
+        val dims = Dimensions.forHeight(maxHeight)
         Column(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(2f)
-                    .padding(horizontal = dims.padding, vertical = dims.padding / 2),
+                    .padding(horizontal = dims.padding, vertical = dims.padding / 4),
             ) {
-                StatusLine(state.connection, dims, onStatusClick)
+                StatusLine(
+                    connection = state.connection,
+                    textSize = dims.labelSize,
+                    height = dims.labelHeight,
+                    onClick = onStatusClick,
+                ) {
+                    TextButton(onClick = onEnd) {
+                        Text("End", fontSize = dims.labelSize)
+                    }
+                    IconButton(onClick = onSettings) {
+                        Icon(Icons.Filled.Settings, contentDescription = "Settings")
+                    }
+                }
                 Row(
                     modifier = Modifier.fillMaxWidth().weight(1f),
                     horizontalArrangement = Arrangement.spacedBy(dims.gap),
@@ -92,12 +126,16 @@ fun RowingScreen(
                     ValueSlot(
                         metric = state.middle,
                         value = state.session.values[state.middle],
+                        choices = Metric.momentary,
+                        onPick = onPickMiddle,
                         dims = dims,
                         modifier = Modifier.weight(1.2f).fillMaxHeight(),
                     )
                     ValueSlot(
                         metric = state.right,
                         value = state.session.values[state.right],
+                        choices = Metric.accumulated,
+                        onPick = onPickRight,
                         dims = dims,
                         modifier = Modifier.weight(1.2f).fillMaxHeight(),
                     )
@@ -116,40 +154,9 @@ fun RowingScreen(
 }
 
 @Composable
-private fun StatusLine(connection: ConnectionState, dims: Dimensions, onClick: () -> Unit) {
+private fun SlotLabel(text: String, dims: Dimensions, modifier: Modifier = Modifier) {
     val colors = LocalRowerColors.current
-    val (text, live) = when (connection) {
-        ConnectionState.Idle -> "Not connected" to false
-        ConnectionState.MissingPermission -> "Bluetooth permission needed – tap to allow" to false
-        ConnectionState.BluetoothOff -> "Bluetooth is off – tap to turn on" to false
-        ConnectionState.Scanning -> "Searching for the rower…" to false
-        is ConnectionState.Connecting -> "Connecting to ${connection.deviceName}…" to false
-        is ConnectionState.Connected -> "Connected to ${connection.deviceName}" to true
-        ConnectionState.Simulated -> "Simulated rower" to true
-    }
-    val actionable = connection == ConnectionState.MissingPermission ||
-        connection == ConnectionState.BluetoothOff
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(dims.labelHeight)
-            .then(if (actionable) Modifier.clickable(onClick = onClick) else Modifier),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(
-            modifier = Modifier
-                .size(dims.labelSize.value.dp * 0.7f)
-                .background(if (live) colors.target else colors.tick, CircleShape),
-        )
-        Spacer(Modifier.width(dims.gap / 3))
-        BasicText(text, style = TextStyle(color = colors.textMuted, fontSize = dims.labelSize))
-    }
-}
-
-@Composable
-private fun SlotLabel(text: String, dims: Dimensions) {
-    val colors = LocalRowerColors.current
-    Box(modifier = Modifier.height(dims.labelHeight), contentAlignment = Alignment.CenterStart) {
+    Box(modifier = modifier.height(dims.labelHeight), contentAlignment = Alignment.CenterStart) {
         BasicText(
             text = text.uppercase(),
             maxLines = 1,
@@ -170,10 +177,42 @@ private fun bigNumberStyle(colors: RowerColors, passed: Boolean) = TextStyle(
 )
 
 @Composable
-private fun ValueSlot(metric: Metric, value: Double?, dims: Dimensions, modifier: Modifier) {
+private fun ValueSlot(
+    metric: Metric,
+    value: Double?,
+    choices: List<Metric>,
+    onPick: (Metric) -> Unit,
+    dims: Dimensions,
+    modifier: Modifier,
+) {
     val colors = LocalRowerColors.current
+    var menuOpen by remember { mutableStateOf(false) }
     Column(modifier = modifier) {
-        SlotLabel(metric.title, dims)
+        Box {
+            Row(
+                modifier = Modifier.clickable { menuOpen = true },
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                SlotLabel(metric.title, dims)
+                Icon(
+                    imageVector = Icons.Filled.ArrowDropDown,
+                    contentDescription = "Choose the value shown here",
+                    tint = colors.textMuted,
+                    modifier = Modifier.size(dims.labelSize.value.dp * 1.6f),
+                )
+            }
+            DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                choices.forEach { choice ->
+                    DropdownMenuItem(
+                        text = { Text(choice.title) },
+                        onClick = {
+                            menuOpen = false
+                            onPick(choice)
+                        },
+                    )
+                }
+            }
+        }
         AutoSizeText(
             text = metric.format(value),
             style = bigNumberStyle(colors, passed = false),

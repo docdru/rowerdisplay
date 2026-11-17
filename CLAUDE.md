@@ -39,7 +39,8 @@ Read this before changing anything. The owner builds this app with AI only and r
 
 - Kotlin, Jetpack Compose, single `app` module, versions only in `gradle/libs.versions.toml`.
 - Package `io.github.docdru.rowerdisplay`. minSdk 26, target and compile SDK 35, JDK 17.
-- Custom drawing (disc, bar, graph) with Compose Canvas; no chart libraries.
+- Custom drawing (disc, bar, graph) with Compose Canvas; no chart libraries. Material 3 is used for controls (buttons, chips, menus, dialogs, switches) only.
+- Settings live in `settings/` (`AppSettings`, `SettingsStore` on SharedPreferences). Navigation is a `Screen` enum in `AppViewModel`; no navigation library.
 - Colours live in `ui/theme/Theme.kt` (`RowerColors`). Do not hard-code colours elsewhere.
 - Planned layers: `ble` (real and simulated rower sources behind one interface), `session` (goal, smoothing, state), `ui`, later `data` (Room).
 - Formatting: ktlint (Android Studio style, trailing commas). Composable functions are PascalCase.

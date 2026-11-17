@@ -1,5 +1,6 @@
 package io.github.docdru.rowerdisplay
 
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -10,8 +11,11 @@ import io.github.docdru.rowerdisplay.session.Goal
 import io.github.docdru.rowerdisplay.session.Metric
 import io.github.docdru.rowerdisplay.session.SessionTracker
 import io.github.docdru.rowerdisplay.session.TargetBand
+import io.github.docdru.rowerdisplay.settings.AppSettings
 import io.github.docdru.rowerdisplay.ui.RowingScreen
 import io.github.docdru.rowerdisplay.ui.RowingUiState
+import io.github.docdru.rowerdisplay.ui.SettingsScreen
+import io.github.docdru.rowerdisplay.ui.StartScreen
 import io.github.docdru.rowerdisplay.ui.theme.RowerDisplayTheme
 import org.junit.Rule
 import org.junit.Test
@@ -63,6 +67,26 @@ class ScreenshotTest {
     @Config(qualifiers = TABLET)
     fun tabletDistanceGoal() = capture("tablet_distance_goal", distanceGoal(atSecond = 470))
 
+    @Test
+    @Config(qualifiers = PHONE)
+    fun phoneStartTime() = captureStart("phone_start_time", Goal.Time(20 * 60))
+
+    @Test
+    @Config(qualifiers = PHONE)
+    fun phoneStartDistance() = captureStart("phone_start_distance", Goal.Distance(2000))
+
+    @Test
+    @Config(qualifiers = TABLET)
+    fun tabletStartTime() = captureStart("tablet_start_time", Goal.Time(20 * 60))
+
+    @Test
+    @Config(qualifiers = PHONE)
+    fun phoneSettings() = captureSettings("phone_settings")
+
+    @Test
+    @Config(qualifiers = TABLET)
+    fun tabletSettings() = captureSettings("tablet_settings")
+
     private fun timeGoal(atSecond: Int) =
         uiState(Goal.Time(20 * 60), atSecond, Metric.Pace, Metric.Distance)
 
@@ -81,8 +105,23 @@ class ScreenshotTest {
         )
     }
 
-    private fun capture(name: String, state: RowingUiState) {
-        composeRule.setContent { RowerDisplayTheme { RowingScreen(state) } }
+    private fun capture(name: String, state: RowingUiState) = render(name) { RowingScreen(state) }
+
+    private fun captureStart(name: String, goal: Goal) = render(name) {
+        StartScreen(
+            goal = goal,
+            connection = ConnectionState.Scanning,
+            onGoalChange = {},
+            onStart = {},
+        )
+    }
+
+    private fun captureSettings(name: String) = render(name) {
+        SettingsScreen(settings = AppSettings(), onChange = {}, onBack = {})
+    }
+
+    private fun render(name: String, content: @Composable () -> Unit) {
+        composeRule.setContent { RowerDisplayTheme { content() } }
         composeRule.onRoot().captureRoboImage("build/outputs/roborazzi/$name.png")
     }
 
