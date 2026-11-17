@@ -7,9 +7,11 @@ import io.github.docdru.rowerdisplay.ble.RowerData
  * other counters since the start, smoothed momentary values, a one-point-per-second
  * history for the graph, and the goal state.
  *
- * Time runs only while the rower makes progress, so the session pauses by itself when
- * rowing stops for [PAUSE_AFTER_MS]. The rower's counters are read as deltas, which
- * also copes with the app starting mid-row or the rower resetting its counters.
+ * Session time follows the rower's own elapsed-time counter when it sends one: the
+ * Woodrower stops that counter as soon as rowing stops, so pauses are exact. Without
+ * it, time runs on the local clock while the rower makes progress and stops
+ * [PAUSE_AFTER_MS] after the last progress. All rower counters are read as deltas,
+ * which copes with the app starting mid-row or the rower resetting its counters.
  *
  * Not thread-safe: call [update] from one thread.
  */
@@ -44,7 +46,11 @@ class SessionTracker(val goal: Goal, private val smoothing: Double = DEFAULT_SMO
         if (distanceDelta > 0) lastProgressMs = nowMs
         val rowing = lastProgressMs?.let { nowMs - it <= PAUSE_AFTER_MS } ?: false
         val step = lastUpdateMs?.let { (nowMs - it).coerceIn(0L, MAX_STEP_MS) } ?: 0L
-        if (rowing) elapsedMs += step
+        if (prev?.elapsedTimeS != null && data.elapsedTimeS != null) {
+            elapsedMs += counterDelta(prev.elapsedTimeS, data.elapsedTimeS) * 1000L
+        } else if (rowing) {
+            elapsedMs += step
+        }
         previous = data
         lastUpdateMs = nowMs
 

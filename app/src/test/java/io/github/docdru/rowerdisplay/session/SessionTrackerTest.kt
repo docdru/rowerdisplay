@@ -59,21 +59,31 @@ class SessionTrackerTest {
     }
 
     @Test
-    fun pausesWhenDistanceStopsGrowing() {
+    fun pausesWithTheRowersClock() {
         val tracker = replay(Goal.Time(1200), 100)
         val stopped = SimulatedRower.dataAt(100).copy(instantaneousPaceS = 0, strokeRateSpm = 0.0)
-        // Rower keeps sending the same distance for 20 s.
+        // Like the Woodrower: distance and elapsed time both stand still for 20 s.
         for (s in 101..120) tracker.update(stopped, s * 1000L)
         val state = tracker.state
         assertFalse(state.rowing)
-        // Up to PAUSE_AFTER_MS of standing still is still counted, then time stops.
-        assertEquals(104, state.elapsedS)
+        assertEquals(100, state.elapsedS)
         assertNull(state.values[Metric.Pace])
 
         // Rowing again: time resumes from there.
-        tracker.update(stopped.copy(totalDistanceM = stopped.totalDistanceM!! + 4), 121_000L)
+        val again = stopped.copy(totalDistanceM = stopped.totalDistanceM!! + 4, elapsedTimeS = 101)
+        tracker.update(again, 121_000L)
         assertTrue(tracker.state.rowing)
-        assertEquals(105, tracker.state.elapsedS)
+        assertEquals(101, tracker.state.elapsedS)
+    }
+
+    @Test
+    fun pausesOnTheLocalClockWhenTheRowerHasNoClock() {
+        val tracker = SessionTracker(Goal.Time(1200))
+        for (s in 0..10) tracker.update(RowerData(totalDistanceM = s * 4), s * 1000L)
+        for (s in 11..30) tracker.update(RowerData(totalDistanceM = 40), s * 1000L)
+        // Up to PAUSE_AFTER_MS of standing still is counted, then time stops.
+        assertEquals(14, tracker.state.elapsedS)
+        assertFalse(tracker.state.rowing)
     }
 
     @Test

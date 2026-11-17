@@ -47,11 +47,17 @@ Read this before changing anything. The owner builds this app with AI only and r
 
 ## Rower facts (Domyos Woodrower, checked with nRF Connect)
 
-- Advertises as `DOMYOS-ROW-xxxx`, Fitness Machine service 0x1826.
+- Advertises as `Domyos-ROW-xxxx` (mixed case; nRF Connect's tab shows it upper-case), Fitness Machine service 0x1826. Match the name case-insensitively.
 - Rower Data 0x2AD1 (notify): stroke rate, stroke count, average stroke rate, total distance, instantaneous pace, instantaneous power, resistance level, energy (total, per hour, per minute), heart rate, elapsed time.
 - Fitness Machine Feature 0x2ACC (read). Training Status 0x2AD3 (notify, read).
 - FTMS may split fields across notifications: always parse by the flags field.
-- The parser tests use hand-built bytes in the exact layout the rower announced (flags `0x0BAE`). When a log of real notifications exists (nRF Connect export), add those bytes as tests.
+- From a real log (17 Nov 2026, `app/src/test/resources/woodrower-2026-11-17.txt`, tested in `RecordedWoodrowerTest`):
+  - Every packet is 23 bytes with flags `0x0BAE`; no split packets seen.
+  - About 4 notifications per second, but the values change only once per second; most packets are repeats.
+  - The rower's elapsed time and distance stop when rowing stops; pace, stroke rate and power drop to 0. The app therefore takes session time from the rower's own clock.
+  - Stroke rate is in half strokes per minute (consistent with the stroke count); power matches 2.8 / (s/m)³.
+  - Resistance level changed while standing still (15 → 13 → 7 → 3 → 9); its meaning is unclear and the app does not use it.
+  - Heart rate is 0 without a strap paired to the rower.
 
 ## CI
 

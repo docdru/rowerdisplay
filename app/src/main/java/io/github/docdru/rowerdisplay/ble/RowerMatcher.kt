@@ -19,7 +19,8 @@ object RowerMatcher {
      * A machine whose service data says it is something else (bike, treadmill) is skipped.
      */
     fun isRower(name: String?, serviceUuids: List<UUID>, ftmsServiceData: ByteArray?): Boolean {
-        if (name?.startsWith(NAME_PREFIX) == true) return true
+        // The Woodrower advertises "Domyos-ROW-1580"; match regardless of case.
+        if (name?.startsWith(NAME_PREFIX, ignoreCase = true) == true) return true
         if (ftmsServiceData != null && ftmsServiceData.size >= 3) {
             val type = (ftmsServiceData[1].toInt() and 0xFF) or
                 ((ftmsServiceData[2].toInt() and 0xFF) shl 8)
