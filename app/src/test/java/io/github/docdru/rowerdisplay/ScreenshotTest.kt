@@ -48,6 +48,15 @@ class ScreenshotTest {
 
     @Test
     @Config(qualifiers = TABLET)
+    fun tabletTimeGoalPassed() = capture("tablet_time_goal_passed", timeGoal(atSecond = 1335))
+
+    @Test
+    @Config(qualifiers = TABLET)
+    fun tabletDistanceGoalPassed() =
+        capture("tablet_distance_goal_passed", distanceGoal(atSecond = 1400))
+
+    @Test
+    @Config(qualifiers = TABLET)
     fun tabletTimeGoal() = capture("tablet_time_goal", timeGoal(atSecond = 440))
 
     @Test
