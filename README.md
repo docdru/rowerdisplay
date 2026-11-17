@@ -7,6 +7,10 @@ A very simple Android app that shows live data from an FTMS rowing machine, buil
 - **Right:** one accumulated value, such as distance, elapsed time or calories.
 - **Bottom band:** the middle value over the session, with its target band shaded.
 
+<img width="2532" height="1170" alt="image" src="https://github.com/user-attachments/assets/7438afcb-f4ac-4b01-b297-0f3e204ec17f" />
+<img width="2532" height="1170" alt="image" src="https://github.com/user-attachments/assets/3ee49294-a821-4bc6-b80f-43f0d34db073" />
+
+
 Tap a value's label to choose what that slot shows. The start screen sets the goal; the gear opens the settings (target ranges, demo mode). Back or **End** ends the session. **Demo mode** (in the settings) uses a simulated rower instead of Bluetooth, to try the app without the machine.
 
 Later: heart rate, then recorded sessions you can compare.
