@@ -27,6 +27,7 @@ Read this before changing anything. The owner builds this app with AI only and r
 ## Product decisions (do not change without asking)
 
 - Landscape only, phone and tablet. Dark theme only.
+- Fullscreen: status and navigation bars are hidden on every screen (a swipe from the edge shows them briefly). Content keeps clear of the camera cutout. Every screen other than the rowing screen has its own back button, since the system one is hidden.
 - Top two thirds: goal element (left), momentary value (middle), accumulated value (right). Bottom third: graph of the middle value with its target band shaded. No overlapping elements.
 - Time goal: 60-minute disc (full disc = 60 min) that empties. Distance goal: a vertical bar whose remaining part shrinks toward the top.
 - At the goal: keep counting, one sound and one vibration. The disc grows back in the opposite direction and the bar fills from the bottom, both in the `goalPassed` colour.
